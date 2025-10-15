@@ -1,3 +1,12 @@
+data "aws_iam_policy_document" "ecs_task_assume" {
+  statement {
+    actions = ["sts:AssumeRole"]
+    principals {
+      type        = "Service"
+      identifiers = ["ecs-tasks.amazonaws.com"]
+    }
+  }
+}
 resource "aws_ecr_repository" "app" {
   name = "${var.name}-app"
   image_scanning_configuration { scan_on_push = true }

@@ -1,3 +1,7 @@
+variable "public_key_path" {
+  type        = string
+  description = "Path to the public key file for Jenkins EC2 key pair"
+}
 variable "name" {
   type = string
 }
