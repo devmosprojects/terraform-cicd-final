@@ -1,3 +1,38 @@
+variable "name" {
+  type = string
+}
+
+variable "vpc_id" {
+  type = string
+}
+
+variable "public_subnet_id" {
+  type = string
+}
+
+variable "jenkins_key_name" {
+  type = string
+}
+
+variable "ecr_repo_name" {
+  type = string
+}
+
+variable "ecs_cluster_name" {
+  type = string
+}
+
+variable "ecs_service_name" {
+  type = string
+}
+
+variable "ecs_task_family" {
+  type = string
+}
+
+variable "aws_region" {
+  type = string
+}
 resource "aws_key_pair" "jenkins_key" {
   key_name   = var.jenkins_key_name
   public_key = file(var.public_key_path) # provide path or generate separately
