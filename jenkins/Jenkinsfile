@@ -1,0 +1,71 @@
+pipeline {
+  agent any
+
+  environment {
+    AWS_REGION = 'us-east-1'              // override if needed
+    ECR_REPO = "${params.ECR_REPO}"       // e.g. 123456789012.dkr.ecr.us-east-1.amazonaws.com/dotnet-cicd-app
+    IMAGE_TAG = "${env.BUILD_ID}"
+    ECS_CLUSTER = "${params.ECS_CLUSTER}"
+    ECS_SERVICE = "${params.ECS_SERVICE}"
+  }
+
+  parameters {
+    string(name: 'ECR_REPO', defaultValue: '', description: 'ECR repo URI (no tag)')
+    string(name: 'ECS_CLUSTER', defaultValue: '', description: 'ECS cluster name')
+    string(name: 'ECS_SERVICE', defaultValue: '', description: 'ECS service name')
+  }
+
+  stages {
+    stage('Checkout') {
+      steps {
+        checkout scm
+      }
+    }
+
+    stage('Build Docker Image') {
+      steps {
+        sh 'docker --version'
+        sh 'docker build -t sampleapp:${IMAGE_TAG} ./app'
+      }
+    }
+
+    stage('Authenticate to ECR') {
+      steps {
+        // Jenkins must have AWS credentials set up (via Credentials plugin or env vars)
+        sh '''
+        aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ECR_REPO}
+        '''
+      }
+    }
+
+    stage('Tag & Push') {
+      steps {
+        sh '''
+        docker tag sampleapp:${IMAGE_TAG} ${ECR_REPO}:${IMAGE_TAG}
+        docker push ${ECR_REPO}:${IMAGE_TAG}
+        '''
+      }
+    }
+
+    stage('Deploy to ECS') {
+      steps {
+        sh '''
+        # create a new task definition revision from existing one (fetch current, patch image)
+        TASK_DEF_JSON=$(aws ecs describe-task-definition --task-definition ${ECS_CLUSTER}-${ECS_SERVICE} --region ${AWS_REGION} --query 'taskDefinition')
+        # Simpler approach: update-service with forceNewDeployment, passing new image via set-container (if using AWS CLI v2)
+        # Using update-service with force-new-deployment after the image is pushed is enough if task def uses :latest or image tag is dynamically set in task def via template
+        aws ecs update-service --cluster ${ECS_CLUSTER} --service ${ECS_SERVICE} --force-new-deployment --region ${AWS_REGION}
+        '''
+      }
+    }
+  }
+
+  post {
+    success {
+      echo "Deployed ${ECR_REPO}:${IMAGE_TAG} to ${ECS_SERVICE}"
+    }
+    failure {
+      echo "Failed"
+    }
+  }
+}
