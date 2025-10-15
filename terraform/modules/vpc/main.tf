@@ -1,3 +1,10 @@
+variable "name" {
+  type = string
+}
+
+variable "cidr" {
+  type = string
+}
 resource "aws_vpc" "this" {
   cidr_block = var.cidr
   tags = { Name = "${var.name}-vpc" }
