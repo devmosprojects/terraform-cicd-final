@@ -23,4 +23,5 @@ module "jenkins" {
   ecs_service_name  = module.ecs.service_name
   ecs_task_family   = module.ecs.task_family
   aws_region        = var.aws_region
+  public_key_path   = "~/.ssh/id_rsa.pub" # Update this path if your public key is elsewhere
 }
