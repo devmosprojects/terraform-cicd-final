@@ -13,6 +13,22 @@ resource "aws_iam_role" "task_exec" {
   assume_role_policy = data.aws_iam_policy_document.ecs_task_assume.json
 }
 
+variable "name" {
+  type = string
+}
+
+variable "vpc_id" {
+  type = string
+}
+
+variable "public_subnet_ids" {
+  type = list(string)
+}
+
+variable "private_subnet_ids" {
+  type = list(string
+}
+
 # attach AWS managed policy for ecs task execution
 resource "aws_iam_role_policy_attachment" "ecs_task_execution" {
   role       = aws_iam_role.task_exec.name
