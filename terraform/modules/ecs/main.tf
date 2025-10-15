@@ -26,7 +26,7 @@ variable "public_subnet_ids" {
 }
 
 variable "private_subnet_ids" {
-  type = list(string
+  type = list(string)
 }
 
 # attach AWS managed policy for ecs task execution
