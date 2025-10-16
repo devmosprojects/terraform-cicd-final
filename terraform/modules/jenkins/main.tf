@@ -70,24 +70,6 @@ resource "aws_security_group" "jenkins_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
-    }
-
-    ingress {
-      description = "Jenkins Web"
-      from_port   = 8080
-      to_port     = 8080
-      protocol    = "tcp"
-      cidr_blocks = ["0.0.0.0/0"]
-    }
-
-    egress {
-      description = "Allow all outbound"
-      from_port   = 0
-      to_port     = 0
-      protocol    = "-1"
-      cidr_blocks = ["0.0.0.0/0"]
-    }
-}
 
 resource "aws_instance" "jenkins" {
   ami           = data.aws_ami.ubuntu.id
